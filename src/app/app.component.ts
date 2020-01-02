@@ -21,9 +21,9 @@ export class AppComponent implements OnInit {
   constructor(private exchangeRatesService: ExchangeRatesService) { }
 
   ngOnInit() {
-    // this.getExchangeRates();
-    // this.setSvgSize();
-    // this.createGraph();
+    this.getExchangeRates();
+    this.setSvgSize();
+    this.createGraph();
   }
 
   createGraph() {
