@@ -45,7 +45,9 @@ export class AppComponent implements OnInit {
       .attr('stroke', '#948e8e')
       .attr('class', 'axis')
       .attr('transform', 'translate(0,' + this.height + ')')
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(x)
+        .ticks(d3.timeDay.every(5))
+      );
 
     const y = d3.scaleLinear()
       .domain([22.0000000, 26.0000000])
@@ -55,25 +57,46 @@ export class AppComponent implements OnInit {
       .attr('stroke', '#948e8e')
       .attr('class', 'axis')
       .call(d3.axisLeft(y)
-        .ticks(7).tickSize(-this.width)
+        .ticks(7)
+        // .tickValues([22.0000000, 23.0000000, 24.0000000, 25.0000000])
+        .tickSize(-this.width)
+        .tickSizeOuter(0)
+      )
+      .call(g => g.selectAll('.tick:not(:first-of-type) line')
+        .attr('stroke-opacity', 0.5)
+        .attr('stroke-dasharray', '10')
       );
 
-    svg.append('path')
+    const path = svg.append('path')
       .datum(this.dataExchangeRates)
       .attr('fill', 'none')
       .attr('stroke', '#2ffcb1')
       .attr('stroke-width', 3)
-      .attr('d', d3.line()
-        .curve(d3.curveBasis)
-        .x((d) => x(new Date(d.date)))
-        .y((d) => y(d.value)));
+      .attr('d', this.drawPath(x, y));
 
     d3.selectAll('.axis path')
       .style('stroke', this.mainAxisColor);
     d3.selectAll('.axis line')
       .style('stroke', this.mainAxisColor);
-    d3.selectAll('.axis .tick line')
-      .style('stroke', '#f3f3f3');
+
+    this.makeAnimation(path);
+  }
+
+  drawPath(x, y) {
+    return (d3.line()
+      .curve(d3.curveBasis)
+      .x((d) => x(new Date(d.date)))
+      .y((d) => y(d.value)));
+  }
+
+  private makeAnimation(path) {
+    const totalLength = path.node().getTotalLength();
+    path
+      .attr('stroke-dasharray', totalLength + ' ' + totalLength)
+      .attr('stroke-dashoffset', totalLength)
+      .transition()
+      .duration(3000)
+      .attr('stroke-dashoffset', 0);
   }
 
   private getExchangeRates() {
